@@ -766,8 +766,11 @@ const RelationModalWithContext = ({
     setTextValue('');
   }, [fieldValue]);
 
+  const textValueRef = React.useRef(textValue);
+  textValueRef.current = textValue;
+
   const handleSearch = async (search: string) => {
-    setSearchParams((s) => ({ ...s, _q: search, page: 1 }));
+    setSearchParams((s) => (s._q === search && s.page === 1 ? s : { ...s, _q: search, page: 1 }));
   };
   return (
     <RelationModalRenderer>
@@ -809,8 +812,15 @@ const RelationModalWithContext = ({
           }
           hasMoreItems={hasNextPage}
           loading={isLoadingSearchRelations || isLoadingPermissions}
-          onOpenChange={() => {
-            handleSearch(textValue ?? '');
+          onOpenChange={(isOpen) => {
+            /**
+             * Only search when opening. Closing happens right after a selection and may be
+             * reported with a stale text value (the selected option's label), which would
+             * search for the relation that was just connected.
+             */
+            if (isOpen) {
+              handleSearch(textValueRef.current ?? '');
+            }
           }}
           noOptionsMessage={() =>
             formatMessage({
