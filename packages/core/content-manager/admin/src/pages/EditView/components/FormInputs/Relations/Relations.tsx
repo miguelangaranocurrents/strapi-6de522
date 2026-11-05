@@ -819,6 +819,11 @@ const RelationModalWithContext = ({
           })}
           onLoadMore={handleLoadMore}
           textValue={textValue}
+          /**
+           * The combobox only adds relations: it never holds a selected value, otherwise it
+           * would sync its text to the last selected option and filter the next search by it.
+           */
+          value={null}
           onChange={handleChange}
           onTextValueChange={(text) => {
             setTextValue(text);
