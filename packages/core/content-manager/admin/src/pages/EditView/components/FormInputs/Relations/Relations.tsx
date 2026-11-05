@@ -625,6 +625,13 @@ const RelationsInput = ({
        *
        */
       onChange(relation);
+
+      /**
+       * The combobox text is cleared once a relation is selected, so reset the
+       * search too. Otherwise the available relations would still be filtered
+       * by the previous search term when the dropdown is reopened.
+       */
+      setSearchParams((s) => (s._q === '' && s.page === 1 ? s : { ...s, _q: '', page: 1 }));
     },
     [data, formatMessage, onChange, toggleNotification]
   );

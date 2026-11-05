@@ -20,7 +20,7 @@ const BooleanInput = forwardRef<HTMLInputElement, InputProps>(
       field.onChange(name, null);
     };
 
-    const showClearButton = !required && field.value !== null && !disabled;
+    const showClearButton = !required && field.value !== null && field.value !== undefined && !disabled;
 
     return (
       <Field.Root error={field.error} name={name} hint={hint} required={required} maxWidth="320px">
