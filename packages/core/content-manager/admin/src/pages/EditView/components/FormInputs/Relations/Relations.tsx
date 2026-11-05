@@ -731,6 +731,11 @@ const RelationModalWithContext = ({
   ...props
 }: RelationModalWithContextProps) => {
   const [textValue, setTextValue] = React.useState<string | undefined>('');
+  /**
+   * Label of the option that was just selected, used to ignore the combobox echoing it back
+   * as the new text value.
+   */
+  const selectedTextRef = React.useRef<string | null>(null);
   const { formatMessage } = useIntl();
   const emptyLabel = formatMessage({
     id: 'content-manager.containers.empty-label',
@@ -819,16 +824,30 @@ const RelationModalWithContext = ({
           })}
           onLoadMore={handleLoadMore}
           textValue={textValue}
-          /**
-           * The combobox only adds relations: it never holds a selected value, otherwise it
-           * would sync its text to the last selected option and filter the next search by it.
-           */
-          value=""
-          onChange={handleChange}
+          onChange={(relationId?: string) => {
+            const selected = options.find((opt) => opt.id.toString() === relationId);
+            selectedTextRef.current = selected
+              ? getRelationLabel(selected, mainField, emptyLabel)
+              : null;
+            setTextValue('');
+            handleChange(relationId);
+          }}
           onTextValueChange={(text) => {
+            /**
+             * After a selection the combobox reports the selected option's label as its new
+             * text. This input only adds relations, so the text must stay empty; otherwise the
+             * next opening would search for the relation that was just connected (and omitted).
+             */
+            if (selectedTextRef.current !== null && text === selectedTextRef.current) {
+              selectedTextRef.current = null;
+              setTextValue('');
+              return;
+            }
+
             setTextValue(text);
           }}
           onInputChange={(event) => {
+            selectedTextRef.current = null;
             handleSearch(event.currentTarget.value);
           }}
           {...props}
